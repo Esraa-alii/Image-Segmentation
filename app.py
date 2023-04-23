@@ -5,6 +5,7 @@ import numpy as np
 from PIL import Image, ImageOps
 import os
 from KMean import KMeans
+import meanShift_optimal as MsO
 
 option=''
 
@@ -22,10 +23,16 @@ with st.sidebar:
         plt.imread(uploaded_file)
         image_path1=os.path.join(path,uploaded_file.name)
         st.title("Options")
-        option = st.selectbox("",["Segmentation using K-means"])
+        option = st.selectbox("",["Segmentation using K-means","Segmentation using mean shift","Optimized Thresholding"])
         if option == "Segmentation using K-means":
             max_iter = st.slider(label="Max number of iterations",min_value=1, max_value=100, step=2)
             k = st.slider(label="clusters",min_value=1, max_value=5, step=1)
+            
+        if option == "Segmentation using mean shift":
+            max_iter = st.slider(label="Max number of iterations",min_value=50, max_value=1000, step=50)
+            
+        if option == "Optimized Thresholding":
+            option1 = st.selectbox("",["Global","Local"])
           
 input_img, resulted_img = st.columns(2)
 with input_img:
@@ -62,3 +69,15 @@ with resulted_img:
             plt.show()
             plt.savefig('./images/output/kmean.jpg')
             st.image('./images/output/kmean.jpg')
+            
+    if option == 'Segmentation using mean shift':
+        if uploaded_file is not None:
+            # st.title("output image")
+            MsO.mean_shift_method(image_path1,max_iter)
+            st.image('./images/output/mean_shift_out.png')
+            
+    if option == 'Optimized Thresholding':
+        if uploaded_file is not None:
+            out_img = MsO.Optimized_Thresholding(image_path1,option1)
+            st.image(out_img)
+            

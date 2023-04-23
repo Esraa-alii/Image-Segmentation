@@ -44,6 +44,18 @@ To start deployment
 
 ![main widow](./Demo/K3.png)
 
+### Segmentation using mean shifting
+
+![main widow](./Demo/mS.png)
+
+### Global optimal Threshold
+
+![main widow](./Demo/G_optimal.png)
+
+### Local optimal Threshold
+
+![main widow](./Demo/L_optimal.png)
+
 
 > ## 🔗 Authors
 - Esraa Ali         
