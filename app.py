@@ -9,6 +9,7 @@ import meanShift_optimal as MsO
 import spectral_threshold as spct
 from skimage.io import imread
 import Region_Growing as RG
+import rgb2luv as luv
 
 
 option=''
@@ -27,7 +28,7 @@ with st.sidebar:
         plt.imread(uploaded_file)
         image_path1=os.path.join(path,uploaded_file.name)
         st.title("Options")
-        option = st.selectbox("",["Segmentation using K-means","Segmentation using mean shift","Optimized Thresholding","Spectral Thresholding","Region Growing"])
+        option = st.selectbox("",["Segmentation using K-means","Segmentation using mean shift","Optimized Thresholding","Spectral Thresholding","Region Growing","RGB to LUV"])
         if option == "Segmentation using K-means":
             max_iter = st.slider(label="Max number of iterations",min_value=1, max_value=100, step=2)
             k = st.slider(label="clusters",min_value=1, max_value=5, step=1)
@@ -101,7 +102,13 @@ with resulted_img:
             data_array = np.array(list(map(float, data_list)),dtype=int)
 
             resulted_image = spct.spectral_threshold(image, threshold_num, data_array)
-            show_output(resulted_image)
+            st.image(resulted_image)
+
+    if option == "RGB to LUV":
+        if uploaded_file is not None:
+            image_ss = imread(image_path1)
+            resulted_image = luv.rgb_to_luv_man(image_ss)
+            st.image(resulted_image)
 
     if option == 'Region Growing':
         if uploaded_file is not None:
