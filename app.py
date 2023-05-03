@@ -10,6 +10,7 @@ import spectral_threshold as spct
 from skimage.io import imread
 import Region_Growing as RG
 import rgb2luv as luv
+import Thresholding as thresh
 
 
 option=''
@@ -28,7 +29,7 @@ with st.sidebar:
         plt.imread(uploaded_file)
         image_path1=os.path.join(path,uploaded_file.name)
         st.title("Options")
-        option = st.selectbox("",["Segmentation using K-means","Segmentation using mean shift","Optimized Thresholding","Spectral Thresholding","Region Growing","RGB to LUV"])
+        option = st.selectbox("",["Segmentation using K-means","Segmentation using mean shift","Optimized Thresholding","Spectral Thresholding","Region Growing","RGB to LUV","Manual & Otsu's Thresholding"])
         if option == "Segmentation using K-means":
             max_iter = st.slider(label="Max number of iterations",min_value=1, max_value=100, step=2)
             k = st.slider(label="clusters",min_value=1, max_value=5, step=1)
@@ -118,3 +119,43 @@ with resulted_img:
             segmented_image_rg =cv2.bitwise_and(img,img, mask=mask)
             segmented_image_rg = cv2.cvtColor(img,cv2.COLOR_BGR2RGB)
             st.image(segmented_image_rg,width=450)
+
+
+#---------------------------------Thresholding------------------------------------------
+if option == "Manual & Otsu's Thresholding":
+    if uploaded_file is not None:
+        threshold = 0; threshold_1 = 0; threshold_2 = 0; threshold_3 = 0; threshold_4 = 0
+        thresh_mode = 0
+        image1=cv2.imread(image_path1)
+        with st.sidebar:
+            edge_detect = st.selectbox("Thresholding Technique", ["Manual Thresholding", "Otsu's Thresholding"])
+            if edge_detect == "Manual Thresholding":
+                thresh_mode = 0
+            elif edge_detect == "Otsu's Thresholding":
+                thresh_mode = 1
+
+            threshold_type = st.radio("Thresholding Type", ["Local", "Global"], horizontal=True)
+            if threshold_type == "Local":
+                if thresh_mode == 0:
+                    threshold_1 = st.slider(label="Threshold Value 1", min_value=0, max_value=255, step=1)
+                    threshold_2 = st.slider(label="Threshold Value 2", min_value=0, max_value=255, step=1)
+                    threshold_3 = st.slider(label="Threshold Value 3", min_value=0, max_value=255, step=1)
+                    threshold_4 = st.slider(label="Threshold Value 4", min_value=0, max_value=255, step=1)
+            elif threshold_type == "Global":
+                if thresh_mode == 0:
+                    threshold =st.slider(label="Threshold Value", min_value=0, max_value=255, step=1)
+                
+        with input_img:
+            image = Image.open(uploaded_file)
+            # st.image(uploaded_file)
+        with resulted_img:
+            if threshold_type == "Local":
+                # st.title("Output image")
+                local_type = thresh.local_thresholding(image1, threshold_1, threshold_2, threshold_3, threshold_4, thresh_mode)
+                st.image(local_type)
+            elif threshold_type == "Global":
+                # st.title("Output image")
+                global_type = thresh.global_thresholding(image1, threshold, thresh_mode)
+                st.image(global_type)
+    
+        
