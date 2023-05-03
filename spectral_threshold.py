@@ -1,19 +1,39 @@
 import numpy as np
 
-def spectral_threshold(image,threshold_num,thresholds):
-    # sorting the threshold ascendingly to prevent any error in thresholding
-    thresholds = np.sort(thresholds)
-    # number of intervals between the thresholds
-    intervals = threshold_num - 1
-    # define the grayscale gradient corresponding to the number of thresholds
-    step = float(1/threshold_num)
-    grayscale_gradient = np.arange(0, (1+step), step)
-    grayscale_gradient = grayscale_gradient[grayscale_gradient<=1]
 
-    new_image = np.where( (image > 0 ) & (image < (thresholds[0]/255)), grayscale_gradient[0], 0)
-    for i in np.arange(threshold_num-1):
-        mask = np.where(((image > (thresholds[i]/255)) & (image < (thresholds[i+1]/255))), grayscale_gradient[i+1], 0)
-        new_image += mask
-    new_image += np.where((image > (thresholds[-1]/255)), grayscale_gradient[-1], 0)
-    
-    return new_image
+import numpy as np
+def spectral_threshold(img):
+    # compute histogram of image
+    hist, _ = np.histogram(img, 256, [0, 256])
+    mean = np.sum(np.arange(256) * hist) / float(img.size)
+
+    optimal_high = 0
+    optimal_low = 0
+    max_variance = 0
+    for high in range(0, 256):
+        for low in range(0, high):
+            w0 = np.sum(hist[0:low])
+            if w0 == 0:
+                continue
+            mean0 = np.sum(np.arange(0, low) * hist[0:low]) / float(w0)
+            w1 = np.sum(hist[low:high])
+            if w1 == 0:
+                continue
+            mean1 = np.sum(np.arange(low, high) * hist[low:high]) / float(w1)
+            
+            w2 = np.sum(hist[high:])
+            if w2 == 0:
+                continue
+            mean2 = np.sum(np.arange(high, 256) * hist[high:]) / float(w2)
+            
+            variance = w0 * (mean0 - mean) * 2 + w1 * (mean1 - mean) * 2 + w2 * (mean2 - mean) ** 2
+            if variance > max_variance:
+                max_variance = variance
+                optimal_high = high
+                optimal_low = low
+
+    binary = np.zeros(img.shape, dtype=np.uint8)
+    binary[img < optimal_low] = 0
+    binary[(img >= optimal_low) & (img < optimal_high)] = 128
+    binary[img >= optimal_high] = 255
+    return binary

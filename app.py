@@ -11,7 +11,7 @@ from skimage.io import imread
 import Region_Growing as RG
 import rgb2luv as luv
 import Thresholding as thresh
-
+import agglomerative as agg
 
 option=''
 
@@ -29,7 +29,7 @@ with st.sidebar:
         plt.imread(uploaded_file)
         image_path1=os.path.join(path,uploaded_file.name)
         st.title("Options")
-        option = st.selectbox("",["Segmentation using K-means","Segmentation using mean shift","Optimized Thresholding","Spectral Thresholding","Region Growing","RGB to LUV","Manual & Otsu's Thresholding"])
+        option = st.selectbox("",["Segmentation using K-means","Segmentation using mean shift","Optimized Thresholding","Spectral Thresholding","Region Growing","RGB to LUV","Manual & Otsu's Thresholding","Agglomerative Segmentation"])
         if option == "Segmentation using K-means":
             max_iter = st.slider(label="Max number of iterations",min_value=1, max_value=100, step=2)
             k = st.slider(label="clusters",min_value=1, max_value=5, step=1)
@@ -39,7 +39,11 @@ with st.sidebar:
             
         if option == "Optimized Thresholding":
             option1 = st.selectbox("",["Global","Local"])
-          
+
+        elif option == "Agglomerative Segmentation":
+            no_of_clusters = st.slider(label="Number of output clusters",min_value=1,max_value=30,step=1,value=4)
+            ini_no_of_clusters = st.slider(label="Initial number of clusters", min_value=30,max_value=256,step=1,value=30)
+           
 input_img, resulted_img = st.columns(2)
 with input_img:
     if uploaded_file is not None:
@@ -89,20 +93,8 @@ with resulted_img:
     
     if option == "Spectral Thresholding":
         if uploaded_file is not None:
-            image_ss = imread(image_path1)
-            with st.sidebar:
-                threshold_num = st.slider(label="Number of thresholds",min_value=2,max_value=25,step=1)
-
-                # create a text area for the user to enter data
-                input_text = st.text_area('Enter thresholds value')
-            if (input_text != ""):
-                # split the input text using "\n" as the delimiter, then convert to a list
-                data_list = input_text.strip().split('\n')
-
-            # convert the list to a NumPy array
-            data_array = np.array(list(map(float, data_list)),dtype=int)
-
-            resulted_image = spct.spectral_threshold(image, threshold_num, data_array)
+            image_ss = cv2.imread(image_path1,0)
+            resulted_image = spct.spectral_threshold(image_ss)
             st.image(resulted_image)
 
     if option == "RGB to LUV":
@@ -120,7 +112,11 @@ with resulted_img:
             segmented_image_rg = cv2.cvtColor(img,cv2.COLOR_BGR2RGB)
             st.image(segmented_image_rg,width=450)
 
-
+    elif option == "Agglomerative Segmentation":
+        if uploaded_file is not None:
+            image_ss = cv2.imread(image_path1)
+            resulted_image = agg.apply_agglomerative_clustering(image_ss, no_of_clusters, ini_no_of_clusters)
+            st.image(resulted_image)
 #---------------------------------Thresholding------------------------------------------
 if option == "Manual & Otsu's Thresholding":
     if uploaded_file is not None:

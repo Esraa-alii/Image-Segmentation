@@ -56,6 +56,31 @@ To start deployment
 
 ![main widow](./Demo/L_optimal.png)
 
+### Local otsu Threshold
+
+![main widow](./Demo/Otsu_local.png)
+
+### Spectral Threshold
+
+![main widow](./Demo/Spectral%20thresholding.png)
+
+###  Otsu global Threshold
+
+![main widow](./Demo/otsu_global.png)
+
+### Manual global  Threshold
+
+![main widow](./Demo/manual%20global%20threshold.png)
+
+### Manual local  Threshold
+
+![main widow](./Demo/manual%20local%20thresholding.png)
+
+### region grwing
+
+![main widow](./Demo/region%20growing.png)
+
+
 
 > ## 🔗 Authors
 - Esraa Ali         
