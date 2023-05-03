@@ -6,6 +6,9 @@ from PIL import Image, ImageOps
 import os
 from KMean import KMeans
 import meanShift_optimal as MsO
+import spectral_threshold as spct
+from skimage.io import imread
+
 
 option=''
 
@@ -23,7 +26,7 @@ with st.sidebar:
         plt.imread(uploaded_file)
         image_path1=os.path.join(path,uploaded_file.name)
         st.title("Options")
-        option = st.selectbox("",["Segmentation using K-means","Segmentation using mean shift","Optimized Thresholding"])
+        option = st.selectbox("",["Segmentation using K-means","Segmentation using mean shift","Optimized Thresholding","Spectral Thresholding"])
         if option == "Segmentation using K-means":
             max_iter = st.slider(label="Max number of iterations",min_value=1, max_value=100, step=2)
             k = st.slider(label="clusters",min_value=1, max_value=5, step=1)
@@ -80,4 +83,21 @@ with resulted_img:
         if uploaded_file is not None:
             out_img = MsO.Optimized_Thresholding(image_path1,option1)
             st.image(out_img)
-            
+    
+    if option == "Spectral Thresholding":
+        if uploaded_file is not None:
+            image_ss = imread(image_path1)
+            with st.sidebar:
+                threshold_num = st.slider(label="Number of thresholds",min_value=2,max_value=25,step=1)
+
+                # create a text area for the user to enter data
+                input_text = st.text_area('Enter thresholds value')
+            if (input_text != ""):
+                # split the input text using "\n" as the delimiter, then convert to a list
+                data_list = input_text.strip().split('\n')
+
+            # convert the list to a NumPy array
+            data_array = np.array(list(map(float, data_list)),dtype=int)
+
+            resulted_image = spct.spectral_threshold(image, threshold_num, data_array)
+            show_output(resulted_image)
